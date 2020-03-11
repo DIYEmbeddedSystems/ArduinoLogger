@@ -1,0 +1,34 @@
+#######################################
+# Syntax Coloring Map For Logger libray
+#######################################
+# Class
+#######################################
+
+Logger	KEYWORD1
+
+#######################################
+# Methods and Functions
+#######################################	
+
+log			 KEYWORD2
+info     KEYWORD2
+trace    KEYWORD2
+info     KEYWORD2
+warn     KEYWORD2
+error    KEYWORD2
+critical KEYWORD2
+
+#######################################
+# Constants
+#######################################
+
+LOG_OFF       LITERAL1
+LOG_CRITICAL  LITERAL1
+LOG_ERROR     LITERAL1
+LOG_WARNING   LITERAL1
+LOG_INFO      LITERAL1
+LOG_DEBUG     LITERAL1
+LOG_ALL       LITERAL1
+LOG_LEVEL_MAX LITERAL1
+
+

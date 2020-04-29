@@ -13,7 +13,7 @@ UdpLogger::UdpLogger(UDP &udp, const char *context, e_log_level level) :
 // the actual output function
 void UdpLogger::vlog(int level, const char *fmt, va_list ap)
 {
-  int offset = 0;
+  int len = 0;
   char buffer[LOG_BUFFER_SIZE];
 
   // process message only if current logging level is below message level
@@ -29,18 +29,21 @@ justify the burden of a coherent clock sampling procedure. */
     unsigned int min = s / 60;
 
     // print log prefix to buffer
-    offset += snprintf(buffer, sizeof(buffer), 
+    len += snprintf(buffer, sizeof(buffer), 
         "[%02u:%02u.%03u%03u\t", 
         (unsigned int)min, (unsigned int)s % 60, 
         (unsigned int)ms % 1000, (unsigned int)us % 1000);
     
-    offset += snprintf(buffer + offset, sizeof(buffer) - offset,
+    len += snprintf(buffer + len, sizeof(buffer) - len,
         "<%s> %c %02u]\t", (const char*)_context, 
         (char)log_level_prefix[level], (unsigned int)_counter);
         
     // print user message to buffer
-    offset += vsnprintf(buffer + offset, sizeof(buffer) - offset, 
+    len += vsnprintf(buffer + len, sizeof(buffer) - len, 
         fmt, ap);
+
+    len += vsnprintf(buffer + len, sizeof(buffer) - len,
+        "\r\n");
 
     // output message buffer
     _udp.write(reinterpret_cast<const uint8_t *>(buffer), offset);

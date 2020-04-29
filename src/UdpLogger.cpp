@@ -42,11 +42,11 @@ justify the burden of a coherent clock sampling procedure. */
     len += vsnprintf(buffer + len, sizeof(buffer) - len, 
         fmt, ap);
 
-    len += vsnprintf(buffer + len, sizeof(buffer) - len,
+    len += snprintf(buffer + len, sizeof(buffer) - len,
         "\r\n");
 
     // output message buffer
-    _udp.write(reinterpret_cast<const uint8_t *>(buffer), offset);
+    _udp.write(reinterpret_cast<const uint8_t *>(buffer), len);
     _udp.endPacket();
   }
 

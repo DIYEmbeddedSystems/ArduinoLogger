@@ -3,15 +3,15 @@
  *
  */
 #include <Arduino.h>
-
-#include "Logger.hpp"
+#include <ArduinoLogger.h>
 
 
 // default logger (not instantiated here) uses Serial for output, and logs all messages
-// logger1 context uses Serial for output, logs only messages above the WARNING level
-// logger2 context uses Serial for output, logs only messages above the INFO level
-Logger logger1("CTX1", Serial, LOG_WARNING);
-Logger logger2("CTX2", Serial, LOG_INFO);
+// logger1 context, for main program, uses Serial for output, logs only messages above the WARNING level
+// logger2 context, for a specific function, uses Serial for output, logs only error and critical messages
+
+Logger loggerProg("PROG", Serial, LOG_WARNING);
+Logger loggerFunc("FUNC", Serial, LOG_ERROR);
 
 
 void setup() {
@@ -22,38 +22,49 @@ void setup() {
   
   // Trace execution with default logger, or with specific loggers.
   TRACE();
-  logger1.trace(__FILENAME__, __LINE__);
-  logger2.trace(__FILENAME__, __LINE__);
+  LOGGER_TRACE(loggerProg);
+  LOGGER_TRACE(loggerFunc);
   
   // DEBUG-level messages
-  LOG("This is a log message");
   DEBUG("This is a debug message");
-  logger1.debug("This is a debug message");
-  logger2.debug("This is a debug message");
+  loggerProg.debug("This is a debug message");
+  loggerFunc.debug("This is a debug message");
   
   // INFO-level messages
   INFO("This is an information message");
-  logger1.info("This is an information message");
-  logger2.info("This is an information message");
+  loggerProg.info("This is an information message");
+  loggerFunc.info("This is an information message");
   
   // WARNING-level messages
   WARN("This is a warning");
-  logger1.warn("This is a warning");
-  logger2.warn("This is a warning");
+  loggerProg.warn("This is a warning");
+  loggerFunc.warn("This is a warning");
   
   // ERROR-level messages
   ERROR("This is an error message!");
-  logger1.error("This is an error message!");
-  logger2.error("This is an error message!");
+  loggerProg.error("This is an error message!");
+  loggerFunc.error("This is an error message!");
   
   // CRITICAL-level messages
   CRITICAL("This is a critical error !!");
-  logger1.critical("This is a critical error !!");
-  logger2.critical("This is a critical error !!");
+  loggerProg.critical("This is a critical error !!");
+  loggerFunc.critical("This is a critical error !!");
 }
 
-void loop() {  
-  TRACE();
+void loop() {
+  loggerFunc.setLevel((enum e_log_level)(((int)loggerFunc.getLevel() + 1) % LOG_ALL));
+  INFO("loggerFunc logging level is now set to %d", loggerFunc.getLevel());
+  loggerProg.debug("This is a debug message");
+  loggerFunc.debug("This is a debug message");
+  loggerProg.info("This is an information message");
+  loggerFunc.info("This is an information message");
+  loggerProg.warn("This is a warning");
+  loggerFunc.warn("This is a warning");
+  loggerProg.error("This is an error message!");
+  loggerFunc.error("This is an error message!");
+  loggerProg.critical("This is a critical error !!");
+  loggerFunc.critical("This is a critical error !!");
+  INFO("\n\n\n");
   delay(1000);
 }
 

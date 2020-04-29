@@ -19,7 +19,6 @@ Code under MIT License
 #include <Arduino.h>  // Print and Serial
 
 #include <stdarg.h>   // variadic macros
-//#include <stdio.h>    
 #include <string.h>   // strrchr
 
 // You can override the default buffer size by #defining this macro in your application code, 
@@ -40,14 +39,23 @@ enum e_log_level{
   LOG_LEVEL_MAX = LOG_ALL
 };
 
-class Logger 
+// short identifier for logging level
+static const char log_level_prefix[LOG_LEVEL_MAX + 1] = {
+  '_', '?', '!', '#', 'i', '+'
+};
+
+// full name of logging level
+static const char *log_level_name[LOG_LEVEL_MAX + 1] = {
+  "_", "CRITICAL", "ERROR", "WARNING", "info", "debug"
+};
+
+
+class LoggerBase 
 {
 public:
-  Logger(const char *context, Print &printer = Serial, e_log_level level = LOG_ALL);
-  
-  static Logger &getDefault();
-  
+  LoggerBase(const char *context = "DFT", e_log_level level = LOG_ALL);
   void log(e_log_level level, const char* fmt, ...);
+  static LoggerBase &getDefault();
   void critical(const char* fmt, ...);
   void error(const char* fmt, ...);
   void warn(const char* fmt, ...);
@@ -57,13 +65,27 @@ public:
   enum e_log_level getLevel();
   void setLevel(enum e_log_level level);
 
-protected:
-  void vlog(int level, const char *fmt, va_list ap);
+//protected:
+  virtual void vlog(int level, const char *fmt, va_list ap) = 0;
   e_log_level _logLevel;
-  Print &_printer;
   const char *_context;
   unsigned int _counter;
 }; // class Logger
+
+
+class SerialLogger : public LoggerBase
+{
+public:
+  SerialLogger(const char *context = "DFT", e_log_level level = LOG_ALL, Print &printer = Serial);
+  static SerialLogger &getDefault();
+  
+protected:
+  void vlog(int level, const char *fmt, va_list ap);
+  Print &_printer;
+ }; // class Logger
+
+
+
 
 
 
@@ -80,6 +102,9 @@ protected:
 
 
 // macro shorthand to use default logger
+#define Logger  SerialLogger
+
+
 #define TRACE()           LOGGER_TRACE(Logger::getDefault())
 #define LOG(msg...)       Logger::getDefault().log(LOG_DEBUG, msg)
 #define DEBUG(msg...)     Logger::getDefault().log(LOG_DEBUG, msg)
@@ -88,7 +113,7 @@ protected:
 #define ERROR(msg...)     Logger::getDefault().log(LOG_ERROR, msg)
 #define CRITICAL(msg...)  Logger::getDefault().log(LOG_CRITICAL, msg)
 
-#define SET_LOG_LEVEL(x) Logger::getDefault().setLevel(x)
+#define SET_LOG_LEVEL(x)  Logger::getDefault().setLevel(x)
 
 // use this macro to trace with a specific logger
 #define LOGGER_TRACE(logger) (logger).trace(FILENAME, __PRETTY_FUNCTION__, __LINE__)

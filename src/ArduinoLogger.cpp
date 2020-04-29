@@ -7,39 +7,23 @@
 #include <stdio.h>
 #include <string.h>
 
-// short identifier for logging level
-static const char log_level_prefix[LOG_LEVEL_MAX + 1] = {
-  '_', '?', '!', '#', 'i', '+'
-};
 
-// full name of logging level
-static const char *log_level_name[LOG_LEVEL_MAX + 1] = {
-  "_", "CRITICAL", "ERROR", "WARNING", "info", "debug"
-};
 
+/* LoggerBase */
 // constructor
-Logger::Logger(const char *context, Print &printer, e_log_level level)
-  : _context(context) 
-  , _printer(printer)
-  , _logLevel(level)
-  , _counter(0)
+LoggerBase::LoggerBase(const char *context, e_log_level level)
+    : _context(context), _logLevel(level), _counter(0)
 {
-  debug("Logger constructed");
 }
 
-// singleton accessor for default logger
-Logger &Logger::getDefault() 
-{ 
-  static Logger defaultLogger((const char*)"DFT", Serial, LOG_ALL);
-  if (!Serial) {
-    Serial.begin(115200);
-    while (!Serial);
-  }
-  return defaultLogger;
+LoggerBase &LoggerBase::getDefault() 
+{
+  return SerialLogger::getDefault();
 }
+
 
 // generic logging function  
-void Logger::log(e_log_level level, const char* fmt, ...)
+void LoggerBase::log(e_log_level level, const char* fmt, ...)
 {
   va_list ap;
   va_start(ap, fmt);
@@ -48,7 +32,7 @@ void Logger::log(e_log_level level, const char* fmt, ...)
 }
 
 // critical error-level logging
-void Logger::critical(const char* fmt, ...)
+void LoggerBase::critical(const char* fmt, ...)
 {
   va_list ap;
   va_start(ap, fmt);
@@ -57,7 +41,7 @@ void Logger::critical(const char* fmt, ...)
 }
 
 // error-level logging
-void Logger::error(const char* fmt, ...)
+void LoggerBase::error(const char* fmt, ...)
 {
   va_list ap;
   va_start(ap, fmt);
@@ -66,7 +50,7 @@ void Logger::error(const char* fmt, ...)
 }
 
 // warning-level logging
-void Logger::warn(const char* fmt, ...)
+void LoggerBase::warn(const char* fmt, ...)
 {
   va_list ap;
   va_start(ap, fmt);
@@ -75,7 +59,7 @@ void Logger::warn(const char* fmt, ...)
 }
 
 // info-level logging
-void Logger::info(const char* fmt, ...)
+void LoggerBase::info(const char* fmt, ...)
 {
   va_list ap;
   va_start(ap, fmt);
@@ -84,7 +68,7 @@ void Logger::info(const char* fmt, ...)
 }
 
 // debug-level logging
-void Logger::debug(const char* fmt, ...)
+void LoggerBase::debug(const char* fmt, ...)
 {
   va_list ap;
   va_start(ap, fmt);
@@ -93,24 +77,46 @@ void Logger::debug(const char* fmt, ...)
 }
 
 // tracing (at debug level)
-void Logger::trace(const char *file, const char *function, int line)
+void LoggerBase::trace(const char *file, const char *function, int line)
 {
   log(LOG_DEBUG, "TRACE: %s:%u (%s)", file, line, function);
 }
 
-enum e_log_level Logger::getLevel() 
+enum e_log_level LoggerBase::getLevel() 
 {
   return _logLevel;
 }
 
-void Logger::setLevel(enum e_log_level level) 
+void LoggerBase::setLevel(enum e_log_level level) 
 {
   _logLevel = level;
 }
 
 
+
+// constructor
+SerialLogger::SerialLogger(const char *context, e_log_level level, Print &printer)
+  : LoggerBase(context, level)
+  , _printer(printer)
+{
+  debug("Logger constructed");
+}
+
+// singleton accessor for default logger
+SerialLogger &SerialLogger::getDefault() 
+{ 
+  static SerialLogger defaultLogger((const char*)"DFT", LOG_ALL, Serial);
+  if (!Serial) {
+    Serial.begin(115200);
+    while (!Serial);
+  }
+  return defaultLogger;
+}
+
+
+
 // the actual output function
-void Logger::vlog(int level, const char *fmt, va_list ap)
+void SerialLogger::vlog(int level, const char *fmt, va_list ap)
 {
   int offset = 0;
   char buffer[LOG_BUFFER_SIZE];

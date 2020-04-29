@@ -12,6 +12,7 @@ void setup() {
   delay(1000);
   
   String testString = "This is a test string";
+  Serial.printf("\n\nStarted\n");
 
   INFO("Application " __FILE__ " compiled " __DATE__ " at " __TIME__ " started.");
 

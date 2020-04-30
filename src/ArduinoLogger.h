@@ -1,4 +1,7 @@
 /* Logger library for Arduino
+Copyright DIY Embedded Systems 2020
+Code under MIT License
+
 
 This library generates a stream of timestamped, contextualized message logs
 logging format: 
@@ -9,8 +12,10 @@ logging format:
  |                +- mnemonic of message logging level
  +- timestamp, in the form minutes:seconds.microseconds 
 
-Copyright DIY Embedded Systems 2020
-Code under MIT License
+TODO: 
++ support SPIFFS, websocket as logging backend.
++ support flash strings F("...")
+
 */
 
 #ifndef ARDUINOLOGGER_HPP
@@ -36,6 +41,7 @@ enum e_log_level{
   LOG_INFO,
   LOG_DEBUG,
   LOG_ALL = LOG_DEBUG,
+  LOG_VERBOSE = LOG_ALL,
   LOG_LEVEL_MAX = LOG_ALL
 };
 
@@ -50,12 +56,13 @@ static const char *log_level_name[LOG_LEVEL_MAX + 1] = {
 };
 
 
-class LoggerBase 
+class Logger
 {
 public:
-  LoggerBase(const char *context = "DFT", e_log_level level = LOG_ALL);
+  Logger(const char *context = "DFT", e_log_level level = LOG_ALL);
   void log(e_log_level level, const char* fmt, ...);
-  static LoggerBase &getDefault();
+  static Logger &getDefault();
+
   void critical(const char* fmt, ...);
   void error(const char* fmt, ...);
   void warn(const char* fmt, ...);
@@ -66,27 +73,12 @@ public:
   void setLevel(enum e_log_level level);
 
 //protected:
-  virtual void vlog(int level, const char *fmt, va_list ap) = 0;
+  void vlog(int level, const char *fmt, va_list ap);
+  virtual void output(const char *buffer, size_t len) = 0;
   e_log_level _logLevel;
   const char *_context;
   unsigned int _counter;
 }; // class Logger
-
-
-class SerialLogger : public LoggerBase
-{
-public:
-  SerialLogger(const char *context = "DFT", e_log_level level = LOG_ALL, Print &printer = Serial);
-  static SerialLogger &getDefault();
-  
-protected:
-  void vlog(int level, const char *fmt, va_list ap);
-  Print &_printer;
- }; // class Logger
-
-
-
-
 
 
 #ifndef NDEBUG
@@ -102,9 +94,6 @@ protected:
 
 
 // macro shorthand to use default logger
-#define Logger  SerialLogger
-
-
 #define TRACE()           LOGGER_TRACE(Logger::getDefault())
 #define LOG(msg...)       Logger::getDefault().log(LOG_DEBUG, msg)
 #define DEBUG(msg...)     Logger::getDefault().log(LOG_DEBUG, msg)

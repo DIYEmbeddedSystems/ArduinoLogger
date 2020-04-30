@@ -2,28 +2,27 @@
 #include <Arduino.h>
 
 #include <ArduinoLogger.h>
+#include <SerialLogger.h>
 
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
 
 
-
-/* LoggerBase */
 // constructor
-LoggerBase::LoggerBase(const char *context, e_log_level level)
+Logger::Logger(const char *context, e_log_level level)
     : _context(context), _logLevel(level), _counter(0)
 {
 }
 
-LoggerBase &LoggerBase::getDefault() 
+Logger &Logger::getDefault() 
 {
   return SerialLogger::getDefault();
 }
 
 
 // generic logging function  
-void LoggerBase::log(e_log_level level, const char* fmt, ...)
+void Logger::log(e_log_level level, const char* fmt, ...)
 {
   va_list ap;
   va_start(ap, fmt);
@@ -32,7 +31,7 @@ void LoggerBase::log(e_log_level level, const char* fmt, ...)
 }
 
 // critical error-level logging
-void LoggerBase::critical(const char* fmt, ...)
+void Logger::critical(const char* fmt, ...)
 {
   va_list ap;
   va_start(ap, fmt);
@@ -41,7 +40,7 @@ void LoggerBase::critical(const char* fmt, ...)
 }
 
 // error-level logging
-void LoggerBase::error(const char* fmt, ...)
+void Logger::error(const char* fmt, ...)
 {
   va_list ap;
   va_start(ap, fmt);
@@ -50,7 +49,7 @@ void LoggerBase::error(const char* fmt, ...)
 }
 
 // warning-level logging
-void LoggerBase::warn(const char* fmt, ...)
+void Logger::warn(const char* fmt, ...)
 {
   va_list ap;
   va_start(ap, fmt);
@@ -59,7 +58,7 @@ void LoggerBase::warn(const char* fmt, ...)
 }
 
 // info-level logging
-void LoggerBase::info(const char* fmt, ...)
+void Logger::info(const char* fmt, ...)
 {
   va_list ap;
   va_start(ap, fmt);
@@ -68,7 +67,7 @@ void LoggerBase::info(const char* fmt, ...)
 }
 
 // debug-level logging
-void LoggerBase::debug(const char* fmt, ...)
+void Logger::debug(const char* fmt, ...)
 {
   va_list ap;
   va_start(ap, fmt);
@@ -77,49 +76,25 @@ void LoggerBase::debug(const char* fmt, ...)
 }
 
 // tracing (at debug level)
-void LoggerBase::trace(const char *file, const char *function, int line)
+void Logger::trace(const char *file, const char *function, int line)
 {
   log(LOG_DEBUG, "TRACE: %s:%u (%s)", file, line, function);
 }
 
-enum e_log_level LoggerBase::getLevel() 
+enum e_log_level Logger::getLevel() 
 {
   return _logLevel;
 }
 
-void LoggerBase::setLevel(enum e_log_level level) 
+void Logger::setLevel(enum e_log_level level) 
 {
   _logLevel = level;
 }
 
-
-
-// constructor
-SerialLogger::SerialLogger(const char *context, e_log_level level, Print &printer)
-  : LoggerBase(context, level)
-  , _printer(printer)
+void Logger::vlog(int level, const char *fmt, va_list ap)
 {
-  debug("Logger constructed");
-}
-
-// singleton accessor for default logger
-SerialLogger &SerialLogger::getDefault() 
-{ 
-  static SerialLogger defaultLogger((const char*)"DFT", LOG_ALL, Serial);
-  if (!Serial) {
-    Serial.begin(115200);
-    while (!Serial);
-  }
-  return defaultLogger;
-}
-
-
-
-// the actual output function
-void SerialLogger::vlog(int level, const char *fmt, va_list ap)
-{
-  int offset = 0;
   char buffer[LOG_BUFFER_SIZE];
+  int len = 0;
 
   // process message only if current logging level is below message level
   if (level <= _logLevel)
@@ -133,21 +108,21 @@ justify the burden of a coherent clock sampling procedure. */
     unsigned int min = s / 60;
 
     // print log prefix to buffer
-    offset += snprintf(buffer, sizeof(buffer), 
+    len += snprintf(buffer, sizeof(buffer), 
         "[%02u:%02u.%03u%03u\t", 
         (unsigned int)min, (unsigned int)s % 60, 
         (unsigned int)ms % 1000, (unsigned int)us % 1000);
     
-    offset += snprintf(buffer + offset, sizeof(buffer) - offset,
+    len += snprintf(buffer + len, sizeof(buffer) - len,
         "<%s> %c %02u]\t", (const char*)_context, 
         (char)log_level_prefix[level], (unsigned int)_counter);
         
     // print user message to buffer
-    offset += vsnprintf(buffer + offset, sizeof(buffer) - offset, 
+    len += vsnprintf(buffer + len, sizeof(buffer) - len, 
         fmt, ap);
 
     // output message buffer
-    _printer.println(buffer);
+    output(buffer, len);
   }
 
   // message counter is incremented even when message is not actually printed

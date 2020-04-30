@@ -4,7 +4,7 @@
  */
 #include <Arduino.h>
 
-#include <ArduinoLogger.h>
+#include <SerialLogger.h>
 
 
 void setup() {

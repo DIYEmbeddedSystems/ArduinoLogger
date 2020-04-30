@@ -8,70 +8,78 @@
 #include <ESP8266WiFi.h>
 #include <WiFiUdp.h>
 
-#include <ArduinoLogger.h>
 #include <UdpLogger.h>
+#include <SerialLogger.h>
 
 
-#define STASSID "your-AP"
+#define STASSID "your-access-point-ssid"
 #define STAPSK  "your-password"
 
-unsigned int localPort = 8888;      // local port to listen on
-
-// buffers for receiving and sending data
-char packetBuffer[UDP_TX_PACKET_MAX_SIZE + 1]; //buffer to hold incoming packet,
-char  ReplyBuffer[] = "ack\r\n";       // a string to send back
 
 WiFiUDP Udp;
 
-UdpLogger logger(Udp, "UDP", LOG_ALL);
+// IP address and port of the listening log server
+// You can set up the server to view the log with:
+// nc -u -k -l 8888
 
+// You can even store the log to a file with:
+// nc -u -k -l 8888 | tee logFile.log
+
+IPAddress logServerIP(192, 168, 1, 105);
+unsigned int logPort = 8888; 
+
+UdpLogger loggerUDP(Udp, logServerIP, logPort, "UDP", LOG_ALL);
+SerialLogger loggerSerial(Serial, "SER", LOG_ALL);
 
 void setup() {
   Serial.begin(115200);
   
-  Serial.println("Application " __FILE__ " compiled " __DATE__ " at " __TIME__ " started.");
-  INFO("Default logger OK");
+  loggerSerial.info("Application " __FILE__ " compiled " __DATE__ " at " __TIME__ " started.");
 
   WiFi.mode(WIFI_STA);
   WiFi.begin(STASSID, STAPSK);
   while (WiFi.status() != WL_CONNECTED) {
-    INFO(".");
+    loggerSerial.info(".");
     delay(500);
   }
 
-  INFO("Connected to %s! My IP is address: %s",
+  loggerSerial.info("Connected to %s! My IP is address: %s",
     STASSID, WiFi.localIP().toString().c_str());
 
-  INFO("UDP server open on port %d", localPort);
-  Udp.begin(localPort);
-  logger.info("Start!!");
+  Udp.begin(logPort);
+  loggerSerial.info("UDP server open on port %d", logPort);
+
+  loggerSerial.info("Connect to the UDP logger with the following command:");
+  loggerSerial.info("nc -u %s %d", WiFi.localIP().toString().c_str(), logPort);
+  loggerUDP.info("Start now!");
+  loggerUDP.info("This log stream is sent to the listening server");
+  loggerUDP.info("Please note, UDP is not reliable; some packets may be lost if the network, or any endpoint is loaded");
+  loggerUDP.info("The message counter in message prefix will help you detect missing packets.");
 }
 
 void loop() {
-  // if there's data available, read a packet
+  // buffer for receiving data
+  char packetBuffer[UDP_TX_PACKET_MAX_SIZE + 1]; 
+
+  // Same UDP connexion can receive data
   int packetSize = Udp.parsePacket();
-  if (packetSize) {
+  if (packetSize) 
+  {
     int n = Udp.read(packetBuffer, UDP_TX_PACKET_MAX_SIZE);
     packetBuffer[n] = 0;
 
-    INFO("Received packet of size %d from %s:%d\t `%s`",
-                  packetSize,
-                  Udp.remoteIP().toString().c_str(), Udp.remotePort(),
-                  packetBuffer);
+    loggerSerial.info("Received packet of size %d from %s:%d\t`%s`",
+        packetSize,
+        Udp.remoteIP().toString().c_str(), Udp.remotePort(),
+        packetBuffer);
   }
 
   static int nextMs = 0;
   const int periodMs = 1000;
-  if (millis() > nextMs) {
+  if (millis() > nextMs) 
+  {
     nextMs += periodMs;
-    logger.info("Hey simple packet works at %d", millis());
-    INFO("Sent timple packet");
-
+    loggerUDP.info("UDP logging works at %d", millis());
+    loggerSerial.info("Serial logging works at %d", millis());
   }
 }
-
-/*
-  test (shell/netcat):
-  --------------------
-	  nc -u 192.168.esp.address 8888
-*/

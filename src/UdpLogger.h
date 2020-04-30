@@ -2,12 +2,14 @@
 #include <ESP8266WiFi.h>
 #include <WiFiUdp.h>
 
-class UdpLogger : public LoggerBase
+class UdpLogger : public Logger
 {
 public:
-  UdpLogger(UDP &udp, const char *context = "DFT", e_log_level level = LOG_ALL);
+  UdpLogger(UDP &udp,  IPAddress address, uint16_t port = 8888, const char *context = "DFT", e_log_level level = LOG_ALL);
   
 protected:
-  void vlog(int level, const char *fmt, va_list ap);
+  void output(const char *log_buffer, size_t len);
   UDP &_udp;
+  const IPAddress _address;
+  const uint16_t _port;
 }; // class Logger

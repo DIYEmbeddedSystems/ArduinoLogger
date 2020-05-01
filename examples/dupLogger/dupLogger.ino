@@ -64,24 +64,11 @@ void loop() {
   // buffer for receiving data
   char packetBuffer[UDP_TX_PACKET_MAX_SIZE + 1]; 
 
-  // Same UDP connexion can receive data
-  int packetSize = Udp.parsePacket();
-  if (packetSize) 
-  {
-    int n = Udp.read(packetBuffer, UDP_TX_PACKET_MAX_SIZE);
-    packetBuffer[n] = 0;
-
-    INFO("Received packet of size %d from %s:%d\t`%s`",
-        packetSize,
-        Udp.remoteIP().toString().c_str(), Udp.remotePort(),
-        packetBuffer);
-  }
-
   static int nextMs = 0;
   const int periodMs = 1000;
   if (millis() > nextMs) 
   {
     nextMs += periodMs;
-    logger.info("Duplicate logger still works at %d", millis());
+    logger.info("Duplicate logger still works at %d. FreeHeap : %d", millis(), ESP.getFreeHeap());
   }
 }

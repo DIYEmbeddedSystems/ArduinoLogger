@@ -11,14 +11,15 @@
 #include <SerialLogger.h>
 #include <DupLogger.h>
 
-
+#include "secret.h"
+/* The "secret.h" file should define the following macro constants:
 #define STASSID "your-AP"
 #define STAPSK  "your-password"
-
+*/
 
 // Create a UDP logger
 WiFiUDP Udp;
-// IP address and port of the listening log server
+// Insert below the IP address and port of the listening server
 // You can set up the server to view the log with:
 // nc -u -k -l 8888
 UdpLogger loggerUDP(Udp, IPAddress(192, 168, 1, 105), 8888, "UDP", LOG_ALL);

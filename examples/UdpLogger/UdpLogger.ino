@@ -11,10 +11,11 @@
 #include <UdpLogger.h>
 #include <SerialLogger.h>
 
-
+#include "secret.h" 
+/* the 'secret.h' file should contain the following definitions:
 #define STASSID "your-access-point-ssid"
 #define STAPSK  "your-password"
-
+*/ 
 
 WiFiUDP Udp;
 

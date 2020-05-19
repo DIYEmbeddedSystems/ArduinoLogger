@@ -15,13 +15,13 @@ Logger::Logger(const char *context, e_log_level level)
 {
 }
 
-Logger &Logger::getDefault() 
+Logger &Logger::getDefault()
 {
   return SerialLogger::getDefault();
 }
 
 
-// generic logging function  
+// generic logging function
 void Logger::log(e_log_level level, const char* fmt, ...)
 {
   va_list ap;
@@ -81,14 +81,19 @@ void Logger::trace(const char *file, const char *function, int line)
   log(LOG_DEBUG, "TRACE: %s:%u (%s)", file, line, function);
 }
 
-enum e_log_level Logger::getLevel() 
+enum e_log_level Logger::getLevel()
 {
   return _logLevel;
 }
 
-void Logger::setLevel(enum e_log_level level) 
+void Logger::setLevel(enum e_log_level level)
 {
   _logLevel = level;
+}
+
+void Logger::setContext(const char *context)
+{
+  _context = context;
 }
 
 void Logger::vlog(int level, const char *fmt, va_list ap)
@@ -99,26 +104,36 @@ void Logger::vlog(int level, const char *fmt, va_list ap)
   // process message only if current logging level is below message level
   if (level <= _logLevel)
   {
-/* Here, we hope there is no rollover between call to millis() and subsequent 
+/* Here, we hope there is no rollover between call to millis() and subsequent
 call to micros(). However log timestamping coherency is not critical enough to
 justify the burden of a coherent clock sampling procedure. */
-    long unsigned int ms = millis(); 
+    long unsigned int ms = millis();
     long unsigned int us = micros();
     unsigned int s = ms / 1000;
     unsigned int min = s / 60;
+    unsigned int h = min / 60;
+    ms %= 1000;
+    s %= 60;
+    min %= 60;
 
     // print log prefix to buffer
-    len += snprintf(buffer, sizeof(buffer), 
-        "[%02u:%02u.%03u%03u\t", 
-        (unsigned int)min, (unsigned int)s % 60, 
-        (unsigned int)ms % 1000, (unsigned int)us % 1000);
-    
+    len += snprintf(buffer, sizeof(buffer),
+        "[%02u:%02u:%02u.%03u",
+        (unsigned int)h, (unsigned int)min, (unsigned int)s,
+        (unsigned int)ms);
+
+#ifdef LOGGER_TSTAMP_MICROSECOND
+    us %= 1000;
+    len += snprintf(buffer, sizeof(buffer) - len,
+        "%03u", (unsigned int)us);
+#endif
+
     len += snprintf(buffer + len, sizeof(buffer) - len,
-        "<%s> %c %02u]\t", (const char*)_context, 
+        "\t<%s> %c\t%03u]\t", (const char*)_context,
         (char)log_level_prefix[level], (unsigned int)_counter);
-        
+
     // print user message to buffer
-    len += vsnprintf(buffer + len, sizeof(buffer) - len, 
+    len += vsnprintf(buffer + len, sizeof(buffer) - len,
         fmt, ap);
 
     // output message buffer

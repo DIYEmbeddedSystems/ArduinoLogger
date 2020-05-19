@@ -1,3 +1,6 @@
+#ifndef UDPLOGGER_H
+#define UDPLOGGER_H
+
 #include <ArduinoLogger.h>
 #include <ESP8266WiFi.h>
 #include <WiFiUdp.h>
@@ -13,3 +16,5 @@ protected:
   const IPAddress _address;
   const uint16_t _port;
 }; // class Logger
+
+#endif

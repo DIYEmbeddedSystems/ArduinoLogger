@@ -26,11 +26,15 @@ TODO:
 #include <stdarg.h>   // variadic macros
 #include <string.h>   // strrchr
 
-// You can override the default buffer size by #defining this macro in your application code, 
-// before including <ArduinoLogger.h>
+// You can override the default buffer size by #defining this macro in your 
+// application code, before including <ArduinoLogger.h>
 #ifndef LOG_BUFFER_SIZE
 #define LOG_BUFFER_SIZE 128
 #endif
+
+// If you need timestamps with microsecond (approx.) precision, add the 
+// following line before #include <ArduinoLogger.h> :
+// #define LOGGER_TSTAMP_MICROSECOND 
 
 
 enum e_log_level{
@@ -71,6 +75,7 @@ public:
   void trace(const char *file, const char *function, int line);
   enum e_log_level getLevel();
   void setLevel(enum e_log_level level);
+  void setContext(const char *context);
 
 //protected:
   void vlog(int level, const char *fmt, va_list ap);

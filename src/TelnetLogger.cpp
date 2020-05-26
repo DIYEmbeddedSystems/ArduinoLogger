@@ -7,7 +7,6 @@ TelnetLogger::TelnetLogger(uint16_t port, const char *context, e_log_level level
 {
   _server.begin();
   _server.setNoDelay(true);
-  debug("TelnetLogger constructed");
 }
 
 
@@ -40,6 +39,5 @@ void TelnetLogger::output(const char *log_buffer, size_t len)
     _client.write(reinterpret_cast<const uint8_t *>(log_buffer), len);
     _client.write('\r');
     _client.write('\n');
-    INFO("Client still connected");
   }
 }

@@ -11,9 +11,9 @@
 #include <SerialLogger.h>
 #include <DupLogger.h>
 
-#include "secret.h"
-/* The "secret.h" file should define the following macro constants:
-#define STASSID "your-AP"
+#include <credentials.h>
+/* put the following constants in the ~/Arduino/libraries/Credentials/credentials.h file (thanks for the tip, Andreas Spiess):
+#define STASSID "your-access-point-ssid"
 #define STAPSK  "your-password"
 */
 

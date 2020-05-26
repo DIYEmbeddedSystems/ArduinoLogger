@@ -35,6 +35,8 @@
 .vscode
 
 # Temporary build & log folders
+*.bin
+*.elf
 build/
 logs/
 

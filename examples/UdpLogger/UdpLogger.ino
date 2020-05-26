@@ -11,11 +11,11 @@
 #include <UdpLogger.h>
 #include <SerialLogger.h>
 
-#include "secret.h" 
-/* the 'secret.h' file should contain the following definitions:
+#include <credentials.h>
+/* put the following constants in the ~/Arduino/libraries/Credentials/credentials.h file (thanks for the tip, Andreas Spiess):
 #define STASSID "your-access-point-ssid"
 #define STAPSK  "your-password"
-*/ 
+*/
 
 WiFiUDP Udp;
 

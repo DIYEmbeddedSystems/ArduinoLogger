@@ -9,15 +9,15 @@ class TelnetLogger : public Logger
 {
 public:
   TelnetLogger(uint16_t port = 23, const char *context = "Telnet", e_log_level level = LOG_ALL);
-  
+
   boolean isClientConnected();
 
-protected:
+//protected:
   void output(const char *log_buffer, size_t len);
-
 
   WiFiServer _server;
   WiFiClient _client;
+  String _buffered;
 }; // class Logger
 
 #endif

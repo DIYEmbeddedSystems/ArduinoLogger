@@ -11,7 +11,7 @@
 
 // constructor
 Logger::Logger(const char *context, e_log_level level)
-    : _context(context), _logLevel(level), _counter(0)
+    : _logLevel(level), _context(context), _counter(0)
 {
 }
 
@@ -108,7 +108,9 @@ void Logger::vlog(int level, const char *fmt, va_list ap)
 call to micros(). However log timestamping coherency is not critical enough to
 justify the burden of a coherent clock sampling procedure. */
     long unsigned int ms = millis();
+#ifdef LOGGER_TSTAMP_MICROSECOND
     long unsigned int us = micros();
+#endif
     unsigned int s = ms / 1000;
     unsigned int min = s / 60;
     unsigned int h = min / 60;

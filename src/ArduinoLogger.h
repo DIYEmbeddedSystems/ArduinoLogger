@@ -55,7 +55,7 @@ static const char log_level_prefix[LOG_LEVEL_MAX + 1] = {
 };
 
 // full name of logging level
-static const char *log_level_name[LOG_LEVEL_MAX + 1] = {
+static const char *log_level_name[LOG_LEVEL_MAX + 1] __attribute__((unused)) = {
   "_", "CRITICAL", "ERROR", "WARNING", "info", "debug"
 };
 

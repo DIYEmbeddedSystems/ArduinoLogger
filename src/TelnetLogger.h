@@ -5,6 +5,9 @@
 #include <ESP8266WiFi.h>
 
 
+// how many bytes of log messages to retain while no client is connected
+#define MAX_BUFFER_LENGTH 1024
+
 class TelnetLogger : public Logger
 {
 public:

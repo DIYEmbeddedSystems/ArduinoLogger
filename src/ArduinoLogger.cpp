@@ -99,7 +99,7 @@ void Logger::setContext(const char *context)
 void Logger::vlog(int level, const char *fmt, va_list ap)
 {
   char buffer[LOG_BUFFER_SIZE];
-  int len = 0;
+  uint32_t len = 0;
 
   // process message only if current logging level is below message level
   if (level <= _logLevel)
@@ -137,6 +137,12 @@ justify the burden of a coherent clock sampling procedure. */
     // print user message to buffer
     len += vsnprintf(buffer + len, sizeof(buffer) - len,
         fmt, ap);
+
+    // if buffer overflowed: mark truncation
+    if (len >= sizeof(buffer))
+    {
+      buffer[sizeof(buffer)-4] = buffer[sizeof(buffer)-3] = buffer[sizeof(buffer)-2] = '~';
+    }
 
     // output message buffer
     output(buffer, len);

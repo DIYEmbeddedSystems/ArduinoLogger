@@ -38,9 +38,7 @@ void TelnetLogger::output(const char *log_buffer, size_t len)
   {
     if (_buffered.length() > 0)
     {
-      _client.print("\r\n<<< Buffered\r\n");
       _client.write(reinterpret_cast<const uint8_t *>(_buffered.c_str()), _buffered.length());
-      _client.print("\r\n>>>\r\n");
       _buffered = String();
     }
     _client.write(reinterpret_cast<const uint8_t *>(log_buffer), len);
@@ -49,9 +47,10 @@ void TelnetLogger::output(const char *log_buffer, size_t len)
   }
   else
   {
-    if (_buffered.length() < 1024)
+    if (_buffered.length() < MAX_BUFFER_LENGTH)
     {
-      _buffered += String(log_buffer);
+      _buffered += ">>";  // mark buffered part
+      _buffered += String(log_buffer).substring(0, MAX_BUFFER_LENGTH - _buffered.length());
       _buffered += "\r\n";
     }
   }

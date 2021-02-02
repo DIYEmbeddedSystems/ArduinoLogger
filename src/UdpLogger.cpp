@@ -1,8 +1,5 @@
 #include <UdpLogger.h>
-
 #include <Arduino.h>
-#include <ESP8266WiFi.h>
-#include <WiFiUdp.h>
 
 UdpLogger::UdpLogger(UDP &udp, IPAddress address, uint16_t port, const char *context, e_log_level level) :
     Logger(context, level), _udp(udp), _address(address), _port(port)

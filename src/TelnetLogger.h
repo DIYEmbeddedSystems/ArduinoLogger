@@ -2,7 +2,11 @@
 #define TELNETLOGGER_H
 
 #include <ArduinoLogger.h>
-#include <ESP8266WiFi.h>
+#if defined(ESP8266)
+  #include <ESP8266WiFi.h>
+#elif defined(ESP32)
+  #include <WiFi.h>
+#endif
 
 
 // how many bytes of log messages to retain while no client is connected

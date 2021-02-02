@@ -11,7 +11,7 @@ FileLogger::FileLogger(File &file, const char *context, e_log_level level) :
 // the actual output function
 void FileLogger::output(const char *log_buffer, size_t len)
 {
-  _file.write(log_buffer, len);
+  _file.write(reinterpret_cast<const uint8_t*>(log_buffer), len);
   _file.write('\r');
   _file.write('\n');
 }

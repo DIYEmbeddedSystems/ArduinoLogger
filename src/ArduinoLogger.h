@@ -29,7 +29,7 @@ TODO:
 // You can override the default buffer size by #defining this macro in your 
 // application code, before including <ArduinoLogger.h>
 #ifndef LOG_BUFFER_SIZE
-#define LOG_BUFFER_SIZE 128
+#define LOG_BUFFER_SIZE 1024
 #endif
 
 // If you need timestamps with microsecond (approx.) precision, add the 
@@ -72,6 +72,7 @@ public:
   void warn(const char* fmt, ...);
   void info(const char* fmt, ...);
   void debug(const char* fmt, ...);
+  void hexdump(const void *data, size_t len);
   void trace(const char *file, const char *function, int line);
   enum e_log_level getLevel();
   void setLevel(enum e_log_level level);

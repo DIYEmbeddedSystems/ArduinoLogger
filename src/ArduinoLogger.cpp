@@ -75,6 +75,45 @@ void Logger::debug(const char* fmt, ...)
   va_end(ap);
 }
 
+// hexdump
+void Logger::hexdump(const void *data, size_t len)
+{
+  const uint8_t *buff = static_cast<const uint8_t *>(data);
+  const int HEXDUMP_LINE_SIZE = 16;
+
+  char line[200];
+  uint32_t idx;
+
+  idx = 0;
+  for (uint32_t offset = 0; offset < len; offset += HEXDUMP_LINE_SIZE)
+  {
+    idx = 0;
+    for (uint32 i = 0; i < HEXDUMP_LINE_SIZE; i++)
+    {
+      if (offset + i < len) 
+      {
+        idx += snprintf(line + idx, sizeof(line) - idx, 
+            "%02x ", buff[offset + i]);
+      }
+      else
+      {
+        idx += snprintf(line + idx, sizeof(line) - idx, "   ");
+      }
+    }
+
+    idx += snprintf(line + idx, sizeof(line) - idx, " | ");
+
+    for (uint32 i = 0; i < HEXDUMP_LINE_SIZE; i++)
+    {
+      char c = (offset + i < len) ? buff[offset + i] :' ';
+      idx += snprintf(line + idx, sizeof(line) - idx, 
+          "%c", isprint(c) ? c : '.');
+    }
+
+    debug("HEXDUMP %s", line);
+  }
+}
+
 // tracing (at debug level)
 void Logger::trace(const char *file, const char *function, int line)
 {
